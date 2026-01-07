@@ -1,17 +1,28 @@
-import { validationResult } from "express-validator";
+import { User } from "../models/user.models.js";
+import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError } from "../utils/api-error.js";
+import jwt from "jsonwebtoken";
 
-export const validate = (req,res,next) => {
-    const errors = validationResult(req);
+export const verifyJWT = asyncHandler(async (req,res,next) => {
+        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
+        if(! token){
+            throw new ApiError(401, "Unauthorized access");
+        }
 
-    if(errors.isEmpty()){
-        return next();
-    }
+        try {
+            const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN);
+            const user = await User.findById(decodedToken._id).select(
+                "-password -RefreshToken -EmailVerificationToken -EmailVerificationTokenExpiry"
+            );
 
-    const existingErrors = [];
-    errors.array().map((err) => existingErrors.push(
-        { [err.path]: err.msg }
-    ));
+            if(!user){
+                throw new ApiError(401, "Unauthorized access");
+            }
 
-    throw new ApiError(409, "Something went wrong while validating data", existingErrors);
-}
+            req.user = user;
+            next();
+        } catch (error) {
+            throw new ApiError(401, "Unauthorized access");
+        }
+
+})
