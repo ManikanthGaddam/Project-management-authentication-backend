@@ -44,8 +44,22 @@ It implements modern authentication best practices including **JWT access & refr
 | Environment | dotenv |
 
 ---
-
 ## 📁 Folder Structure
+
+```text
+Project-management-authentication-backend/
+├── src/
+│   ├── controllers/
+│   ├── middlewares/
+│   ├── models/
+│   ├── routes/
+│   └── utils/
+├── .env
+├── .gitignore
+├── package.json
+└── README.md
+
+
 📦Project-management-authentication-backend
 ┣ 📂src
 ┃ ┣ 📂controllers
